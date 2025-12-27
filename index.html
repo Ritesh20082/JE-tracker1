@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritesh JE Success Tracker</title>
+    <style>
+        :root { 
+            --primary: #1a1a1a; --bg: #e5e7eb; --text: #1e293b; 
+            --date-clr: #2563eb; --month-clr: #16a34a; --day-clr: #ea580c;
+            --do-clr: #16a34a; --dont-clr: #dc2626; --accent: #7c3aed;
+        }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        
+        .app-header { 
+            background: #fff; 
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 30px 20px; text-align: center;
+            border-bottom: 4px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .date-badge { display: inline-flex; gap: 10px; font-weight: bold; font-size: 1.2rem; background: white; padding: 10px 20px; border-radius: 50px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #dateNum { color: var(--date-clr); }
+        #monthName { color: var(--month-clr); }
+        #dayName { color: var(--day-clr); border-left: 2px solid #ddd; padding-left: 10px; }
+
+        .container { max-width: 500px; margin: -20px auto 50px; padding: 0 15px; position: relative; z-index: 10; }
+        
+        section { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #f3f4f6; }
+        
+        h2 { font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+        /* Fixed About Me Style */
+        .fixed-profile { 
+            color: #000; font-style: italic; font-weight: 800; font-size: 1.1rem; 
+            line-height: 1.6; padding: 10px; border-left: 5px solid #000; background: #f9f9f9;
+        }
+
+        .progress-box { margin-top: 15px; background: #f1f5f9; border-radius: 10px; height: 10px; overflow: hidden; }
+        #progressBar { height: 100%; width: 0%; background: linear-gradient(90deg, #1a1a1a, #4b5563); transition: width 0.5s ease; }
+
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; }
+
+        button { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: 600; margin-top: 5px; }
+        .whatsapp-btn { background: #22c55e !important; }
+        .tg-btn { background: #0088cc !important; }
+
+        .task-item { display: flex; align-items: center; padding: 12px; background: #f8fafc; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid #cbd5e1; }
+        .task-item.completed { border-left-color: #22c55e; background: #f0fdf4; }
+        .done-text { text-decoration: line-through; color: #94a3b8; }
+        
+        .grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .target-card { background: #fefce8; border: 1px solid #fef08a; text-align: center; }
+        .target-days { font-size: 2rem; font-weight: 900; color: #854d0e; }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <div class="date-badge">
+        <span id="dateNum">DD</span>
+        <span id="monthName">MM/YYYY</span>
+        <span id="dayName">Day</span>
+    </div>
+    <div class="container" style="margin: 20px 0 0 0; max-width: 100%;">
+        <div class="progress-box"><div id="progressBar"></div></div>
+        <p id="progressPercent" style="font-size: 0.8rem; margin-top: 5px; color: #64748b;">0% Task Progress</p>
+    </div>
+</div>
+
+<div class="container">
+    <section>
+        <h2>👤 My Mission</h2>
+        <div class="fixed-profile">
+            My name is Ritesh Kumar Singh. <br>
+            I want to become a JE of Bihar, so I'm trying to improve myself every day.
+        </div>
+    </section>
+
+    <section class="target-card">
+        <h2>🎯 Exam Target Date</h2>
+        <input type="date" id="targetDateInput" onchange="saveTargetDate()">
+        <div id="countdownArea" style="margin-top:10px;">
+            <div class="target-days" id="daysLeft">0</div>
+            <div style="font-size:0.8rem; color: #854d0e;">DAYS REMAINING FOR TARGET</div>
+        </div>
+    </section>
+
+    <section style="background: #f0f9ff; border: 1px solid #bae6fd;">
+        <h2>🔹 Sunday Telegram Quiz</h2>
+        <input type="text" id="quizLink" placeholder="Paste Telegram Quiz Link Here">
+        <div class="grid-half">
+            <input type="time" id="quizTime">
+            <button onclick="saveQuizSettings()" class="tg-btn" style="height: 48px; margin-top: 8px;">Save Quiz</button>
+        </div>
+        <p id="quizStatus" style="font-size: 0.7rem; color: #0369a1; margin-top: 5px; font-weight: bold;"></p>
+    </section>
+
+    <section style="background: #fff1f2;">
+        <h2>⏰ Daily Alarm</h2>
+        <input type="time" id="alarmTime">
+        <button onclick="saveAlarm()" style="background: #475569;">Set Alarm</button>
+        <button id="stopAlarmBtn" onclick="stopAlarm()" style="display:none; background: #ef4444;">STOP ALARM 🔕</button>
+    </section>
+
+    <section>
+        <h2>✅ Today's Tasks</h2>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="taskInput" placeholder="Add task..." style="margin:0;">
+            <button onclick="addTask()" style="width: 70px;">Add</button>
+        </div>
+        <div id="taskList" style="margin-top:15px;"></div>
+    </section>
+
+    <section>
+        <div class="grid-half">
+            <div>
+                <h2 style="color: #16a34a;">✔️ Do's</h2>
+                <textarea id="dailyDos" placeholder="Add..." rows="4"></textarea>
+            </div>
+            <div>
+                <h2 style="color: #dc2626;">❌ Don'ts</h2>
+                <textarea id="dailyDonts" placeholder="Add..." rows="4"></textarea>
+            </div>
+        </div>
+        <h2>📝 General Notes</h2>
+        <textarea id="dailyNotes" placeholder="Daily notes..." rows="3"></textarea>
+        <button onclick="saveAllDailyData()">Save Progress</button>
+        <button onclick="sendWhatsAppReport()" class="whatsapp-btn">📲 WhatsApp Full Report</button>
+    </section>
+</div>
+
+<audio id="alarmSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" loop></audio>
+
+<script>
+    let currentDateStr = new Date().toISOString().split('T')[0];
+    const MY_NUMBER = "919117159791"; 
+
+    window.onload = function() {
+        updateDateDisplay();
+        loadData();
+        // Load Saved Settings
+        document.getElementById('alarmTime').value = localStorage.getItem('alarm_time') || '';
+        document.getElementById('targetDateInput').value = localStorage.getItem('target_date') || '';
+        document.getElementById('quizLink').value = localStorage.getItem('quiz_link') || '';
+        document.getElementById('quizTime').value = localStorage.getItem('quiz_time') || '';
+        
+        calculateTargetDays();
+        if (Notification.permission !== "granted") Notification.requestPermission();
+        setInterval(masterClock, 1000);
+    };
+
+    function updateDateDisplay() {
+        const d = new Date();
+        document.getElementById('dateNum').innerText = d.getDate().toString().padStart(2, '0');
+        document.getElementById('monthName').innerText = (d.getMonth() + 1).toString().padStart(2, '0') + "/" + d.getFullYear();
+        document.getElementById('dayName').innerText = d.toLocaleDateString('en-IN', { weekday: 'long' });
+    }
+
+    // Alarm & Quiz Automation
+    function masterClock() {
+        const now = new Date();
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds();
+
+        // 1. Check Alarm
+        if (currentTime === localStorage.getItem('alarm_time') && seconds === 0) startAlarm();
+
+        // 2. Check Telegram Quiz (Sunday only)
+        if (now.getDay() === 0) { // 0 is Sunday
+            if (currentTime === localStorage.getItem('quiz_time') && seconds === 0) {
+                const link = localStorage.getItem('quiz_link');
+                if(link) {
+                    alert("Sunday Quiz Time! Telegram link opening...");
+                    window.open(link, '_blank');
+                }
+            }
+            document.getElementById('quizStatus').innerText = "Status: Sunday Quiz is Active for " + localStorage.getItem('quiz_time');
+        } else {
+            document.getElementById('quizStatus').innerText = "Status: Waiting for Sunday...";
+        }
+    }
+
+    function saveTargetDate() {
+        localStorage.setItem('target_date', document.getElementById('targetDateInput').value);
+        calculateTargetDays();
+    }
+
+    function calculateTargetDays() {
+        const target = new Date(localStorage.getItem('target_date'));
+        const today = new Date();
+        if(isNaN(target)) return;
+        const diff = target - today;
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        document.getElementById('daysLeft').innerText = days > 0 ? days : "Reached!";
+    }
+
+    function saveQuizSettings() {
+        localStorage.setItem('quiz_link', document.getElementById('quizLink').value);
+        localStorage.setItem('quiz_time', document.getElementById('quizTime').value);
+        alert("Sunday Quiz Settings Saved!");
+    }
+
+    function saveAlarm() {
+        localStorage.setItem('alarm_time', document.getElementById('alarmTime').value);
+        alert("Alarm set!");
+    }
+
+    function startAlarm() { document.getElementById('alarmSound').play(); document.getElementById('stopAlarmBtn').style.display = 'block'; }
+    function stopAlarm() { document.getElementById('alarmSound').pause(); document.getElementById('alarmSound').currentTime = 0; document.getElementById('stopAlarmBtn').style.display = 'none'; }
+
+    // Task & Data Logic
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        if (!input.value.trim()) return;
+        const data = getDayData();
+        data.tasks.push({ text: input.value, completed: false });
+        saveDayData(data);
+        input.value = '';
+        renderTasks(data.tasks);
+    }
+
+    function renderTasks(tasks) {
+        const list = document.getElementById('taskList');
+        list.innerHTML = tasks.map((task, i) => `
+            <div class="task-item ${task.completed ? 'completed' : ''}" onclick="toggleTask(${i})" style="cursor:pointer">
+                <span class="${task.completed ? 'done-text' : ''}">${task.completed ? '✅' : '⚪'} ${task.text}</span>
+            </div>
+        `).join('');
+        const completed = tasks.filter(t => t.completed).length;
+        const percent = tasks.length === 0 ? 0 : Math.round((completed / tasks.length) * 100);
+        document.getElementById('progressBar').style.width = percent + "%";
+        document.getElementById('progressPercent').innerText = percent + "% Completed";
+    }
+
+    function toggleTask(index) {
+        const data = getDayData();
+        data.tasks[index].completed = !data.tasks[index].completed;
+        saveDayData(data);
+        renderTasks(data.tasks);
+    }
+
+    function getDayData() { return JSON.parse(localStorage.getItem('data_' + currentDateStr)) || { tasks: [], dos: '', donts: '', notes: '' }; }
+    function saveDayData(data) { localStorage.setItem('data_' + currentDateStr, JSON.stringify(data)); }
+
+    function loadData() {
+        const data = getDayData();
+        document.getElementById('dailyDos').value = data.dos || '';
+        document.getElementById('dailyDonts').value = data.donts || '';
+        document.getElementById('dailyNotes').value = data.notes || '';
+        renderTasks(data.tasks);
+    }
+
+    function saveAllDailyData() {
+        const data = getDayData();
+        data.dos = document.getElementById('dailyDos').value;
+        data.donts = document.getElementById('dailyDonts').value;
+        data.notes = document.getElementById('dailyNotes').value;
+        saveDayData(data);
+        alert("Saved!");
+    }
+
+    function sendWhatsAppReport() {
+        const data = getDayData();
+        const total = data.tasks.length;
+        const completed = data.tasks.filter(t => t.completed).length;
+        let msg = `*📓 RITESH'S DAILY REPORT*%0A*Success:* ${total === 0 ? 0 : Math.round((completed/total)*100)}%0A%0A*✅ TASKS:*%0A`;
+        data.tasks.forEach(t => msg += `${t.completed ? '✅' : '❌'} ${t.text}%0A`);
+        if(data.dos) msg += `%0A*✔️ DO'S:*%0A${data.dos}%0A`;
+        if(data.donts) msg += `%0A*❌ DON'TS:*%0A${data.donts}%0A`;
+        window.open(`https://wa.me/${MY_NUMBER}?text=${msg}`, '_blank');
+    }
+</script>
+</body>
+</html>
